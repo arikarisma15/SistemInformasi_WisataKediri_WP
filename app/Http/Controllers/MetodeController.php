@@ -48,7 +48,7 @@ class MetodeController extends Controller
                 JOIN data_nilaikeamanan ON data_penilaian.ID_Keamanan = data_nilaikeamanan.ID_Keamanan
                 JOIN data_nilaiobjekatraksi ON data_penilaian.ID_ObjekAtraksi = data_nilaiobjekatraksi.ID_ObjekAtraksi
          */
-
+        #query join yang menggabungkan beberapa tabel 
         $dataset = data_penilaian::join('datawisata', 'datawisata.ID_Wisata', '=', 'data_penilaian.ID_Wisata')
             ->join('data_nilailokasi', 'data_nilailokasi.ID_Lokasi', '=', 'data_penilaian.ID_Lokasi')
             ->join('data_nilaifasilitas', 'data_nilaifasilitas.ID_Fasilitas', '=', 'data_penilaian.ID_Fasilitas')
@@ -71,12 +71,14 @@ class MetodeController extends Controller
                 $nilai_keamanan = (int) $isi->Nilai_KriteriaLokasi;
                 $nilai_objek = (int) $isi->Nilai_KriteriaLokasi;
                 
+                //Mengambil nilai-nilai kriteria dan melakukan konversi menggunakan fungsi konversi_data_penilaian().
                 $convert_kriteria_lokasi = $this->konversi_data_penilaian($nilai_kriteria_lokasi, $dt_keterangan_nilai);
                 $convert_fasilitas = $this->konversi_data_penilaian($nilai_fasilitas, $dt_keterangan_nilai);
                 $convert_keamanan = $this->konversi_data_penilaian($nilai_keamanan, $dt_keterangan_nilai);
                 $convert_objek = $this->konversi_data_penilaian($nilai_objek, $dt_keterangan_nilai);
 
                 // perhitungan s 
+                //Setiap Kriteira fungsi mencari_nilai_s() dengan parameter nilai konversi kriteria dan jenis kriteria yang sesuai.
                 $s_lokasi = $this->mencari_nilai_s($convert_kriteria_lokasi, "Kriteria Lokasi");
                 $s_fasilitas = $this->mencari_nilai_s($convert_fasilitas, "Kriteria Fasilitas");
                 $s_keamanan  = $this->mencari_nilai_s($convert_keamanan, "Kriteria Keamanan");
@@ -88,6 +90,7 @@ class MetodeController extends Controller
                 // konversi nilai ke data_penilaian
                 // echo "<h2>$isi->ID_Penilaian hasil s : $nilai_s_keseluruhan</h2>";
                 // echo number_format($s_lokasi, 10).". ; $s_fasilitas ; $s_keamanan ; $s_objek";
+
                 $isi->convert_kriteria_lokasi = $convert_kriteria_lokasi;
                 $isi->convert_fasilitas = $convert_fasilitas;
                 $isi->convert_keamanan = $convert_keamanan;
@@ -109,7 +112,7 @@ class MetodeController extends Controller
 
 
             // perhitungan vektor v dan vektor s
-            $dt_keseluruhan = array();
+            $dt_keseluruhan = array(); // menyimpan hasil
             foreach ( $dt_konversi_nilai AS $isi ) {
 
                 // mencari nilai vektor s 
@@ -117,7 +120,10 @@ class MetodeController extends Controller
                 $vektor_v = $vektor_s / $total;
 
                 $isi->vektor_v = $vektor_v;
-                array_push( $dt_keseluruhan, $isi );
+                array_push( $dt_keseluruhan, $isi ); 
+                //Hasil perhitungan vektor "v" untuk setiap data disimpan dalam 
+                //properti $vektor_v pada masing-masing data dalam $dt_keseluruhan.
+
 
                 // echo "<h2>$isi->ID_Penilaian vektor : ".number_format($vektor_v, 9)."</h2>";
             } 
@@ -131,8 +137,6 @@ class MetodeController extends Controller
             usort($dt_keseluruhan, function($a, $b) {
                 return $b->vektor_v <=> $a->vektor_v;
             });
-
-
 
             $origin_json = json_encode( $original_data );
             $sorting_json = json_encode( $dt_keseluruhan );
@@ -171,7 +175,7 @@ class MetodeController extends Controller
                 $rangeAwal = (int)$range[0];
                 $rangeAkhir = (int)$range[1];
             } else {
-                // Kasus jika delimiter "-" tidak ditemukan
+                //  jika delimiter "-" tidak ditemukan
                 $rangeAwal = 0;
                 $rangeAkhir = 0;
             }
@@ -199,6 +203,7 @@ class MetodeController extends Controller
         return $hasil;
     }
 
+    
     function reset() {
 
         DB::table('metode')->truncate();
